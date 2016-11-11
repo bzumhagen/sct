@@ -5,16 +5,35 @@ import com.typesafe.config.ConfigFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 final class ChangelogConfiguration {
+    private Pattern versionPattern;
+    private Pattern tagPattern;
+    private Pattern referencePattern;
     private Set<String> tags;
 
     ChangelogConfiguration() {
         Config conf = ConfigFactory.load();
-        tags = new HashSet<String>(conf.getStringList("sct.tags"));
+        versionPattern = Pattern.compile(conf.getString("sct.patterns.version"));
+        tagPattern = Pattern.compile(conf.getString("sct.patterns.tag"));
+        referencePattern = Pattern.compile(conf.getString("sct.patterns.reference"));
+        tags = new HashSet<>(conf.getStringList("sct.tags"));
     }
 
     Set<String> getTags() {
         return tags;
+    }
+
+    Pattern getVersionPattern() {
+        return versionPattern;
+    }
+
+    Pattern getTagPattern() {
+        return tagPattern;
+    }
+
+    Pattern getReferencePattern() {
+        return referencePattern;
     }
 }

@@ -17,16 +17,19 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GitChangelog implements Changelog {
+class GitChangelog implements Changelog {
+    private ChangelogConfiguration config;
     private List<ChangelogChange> changes;
     private File gitDir;
 
-    GitChangelog(File gitDir) {
+    GitChangelog(ChangelogConfiguration config, File gitDir) {
+        this.config = config;
         this.gitDir = gitDir;
         this.changes = buildChanges(gitDir);
     }
 
-    GitChangelog(File gitDir, Version startVersion, Version endVersion) {
+    GitChangelog(ChangelogConfiguration config, File gitDir, Version startVersion, Version endVersion) {
+        this.config = config;
         this.gitDir = gitDir;
         this.changes = buildChanges(gitDir, startVersion, endVersion);
     }
@@ -37,51 +40,38 @@ public class GitChangelog implements Changelog {
 
     private List<ChangelogChange> buildChanges(File gitDir, Version startVersion, Version endVersion) {
         List<ChangelogChange> builtChanges = new ArrayList<>();
-        RepositoryBuilder repositoryBuilder =
-            new RepositoryBuilder()
-                .setMustExist(true)
-                .setGitDir(gitDir);
         try {
-            Repository repository = repositoryBuilder.build();
-            Git git = new Git(repository);
+            Git git = Git.open(gitDir);
             for(RevCommit commit : git.log().call()) {
                 buildChange(commit).map(builtChanges::add);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoHeadException e) {
-            e.printStackTrace();
-        } catch (GitAPIException e) {
+        } catch (IOException | GitAPIException e) {
             e.printStackTrace();
         }
-        return null;
+        return builtChanges;
     }
 
     private Optional<ChangelogChange> buildChange(RevCommit commit) {
         String commitMessage = commit.getFullMessage();
         String description = commit.getShortMessage();
-        Optional<String> tag = getTagFromMessage(commitMessage);
         Optional<Version> version = getVersionFromMessage(commitMessage);
+        Optional<String> tag = getMatchFor(config.getTagPattern(), commitMessage);
+        Optional<String> reference = getMatchFor(config.getReferencePattern(), commitMessage);
         if(tag.isPresent() && version.isPresent()) {
-            ChangelogChange change = new ChangelogChange(description, tag.get(), version.get());
+            ChangelogChange change = new ChangelogChange(description, version.get(), tag.get(), reference.orElse(""));
             return Optional.of(change);
         } else {
             return Optional.empty();
         }
     }
 
-    private Optional<String> getTagFromMessage(String commitMessage) {
-        return getMatchFor("\ntag: (.*?)", commitMessage);
-    }
-
     private Optional<Version> getVersionFromMessage(String commitMessage) {
-        Optional<String> version = getMatchFor("\nversion: (.*?)", commitMessage);
+        Optional<String> version = getMatchFor(config.getVersionPattern(), commitMessage);
         return version.map(Version::valueOf);
     }
 
-    private Optional<String> getMatchFor(String regex, String data) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(data);
+    private Optional<String> getMatchFor(Pattern regex, String data) {
+        Matcher matcher = regex.matcher(data);
         if (matcher.find()) {
             return Optional.of(matcher.group(1));
         } else {
