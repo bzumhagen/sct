@@ -8,9 +8,9 @@ class ChangelogConfigurationTest extends FlatSpec with Matchers {
 
   "ChangelogConfiguration" should "load the default configuration" in {
     val config = new ChangelogConfiguration
-    val expectedVersionPattern = "\nversion: (.+)".r
-    val expectedTagPattern = "\ntag: (.+)".r
-    val expectedReferencePattern = "\nresolves: (.+)".r
+    val expectedVersionPattern = "[\\s\\S]*\nversion: (.+)[\\s\\S]*".r
+    val expectedTagPattern = "[\\s\\S]*\ntag: (.+)[\\s\\S]*".r
+    val expectedReferencePattern = "[\\s\\S]*\nresolves: (.+)[\\s\\S]*".r
     val expectedTags = Set(
       "added",
       "changed",
