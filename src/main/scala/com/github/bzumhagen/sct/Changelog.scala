@@ -4,5 +4,5 @@ import better.files.File
 
 trait Changelog {
   def getChanges: Seq[ChangelogChange]
-  def generateMarkdown(file: File): Unit
+  def generateMarkdown(file: File, changes: Seq[ChangelogChange]): File
 }

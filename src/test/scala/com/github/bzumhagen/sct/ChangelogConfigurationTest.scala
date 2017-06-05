@@ -12,10 +12,10 @@ class ChangelogConfigurationTest extends FlatSpec with Matchers {
     val expectedTagPattern = "[\\s\\S]*\ntag: (.+)[\\s\\S]*".r
     val expectedReferencePattern = "[\\s\\S]*\nresolves: (.+)[\\s\\S]*".r
     val expectedTags = Set(
-      "added",
-      "changed",
-      "removed",
-      "deprecated"
+      "Added",
+      "Changed",
+      "Removed",
+      "Deprecated"
     )
 
     config.versionPattern.regex shouldBe expectedVersionPattern.regex
