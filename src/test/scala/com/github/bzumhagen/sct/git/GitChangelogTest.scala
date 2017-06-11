@@ -25,6 +25,19 @@ class GitChangelogTest extends FlatSpec with Matchers {
     gitChangelog.getChanges shouldBe Seq(expectedChange)
   }
 
+  "GitChangelog" should "skip changes without version or tag" in {
+    val (dir, repo) = initializeGitRepo
+    val gitChangelog = new GitChangelog(DefaultConfiguration, dir)
+    val expectedChange = ChangelogChange(DefaultDescription, Version.valueOf("1.0.0"), "added", Some("XYZ-123"), Today)
+
+    commitToRepoWithoutTag(repo, "Some change without a tag", Version.valueOf("1.0.0"), "")
+    commitToRepoWithoutVersion(repo, "Some change without a version", "added", "")
+    commitToRepo(repo, expectedChange.description, expectedChange.version, expectedChange.changeType, expectedChange.reference.get)
+    commitToRepoWithOnlyDescription(repo, "Some change with only a description")
+
+    gitChangelog.getChanges shouldBe Seq(expectedChange)
+  }
+
   it should "generate a markdown file properly" in {
     val (dir, repo) = initializeGitRepo
     val gitChangelog = new GitChangelog(DefaultConfiguration, dir)
@@ -83,6 +96,24 @@ class GitChangelogTest extends FlatSpec with Matchers {
   private def commitToRepo(repo: Git, description: String, version: Version, tag: String, reference: String): Unit = {
     repo.commit.setAllowEmpty(true).setMessage(
       s"$description\n\nThis is the long form description of my change\n\nversion: $version\ntag: $tag\nresolves: $reference"
+    ).call()
+  }
+
+  private def commitToRepoWithoutVersion(repo: Git, description: String, tag: String, reference: String): Unit = {
+    repo.commit.setAllowEmpty(true).setMessage(
+      s"$description\n\nThis is the long form description of my change\n\ntag: $tag\nresolves: $reference"
+    ).call()
+  }
+
+  private def commitToRepoWithoutTag(repo: Git, description: String, version: Version, reference: String): Unit = {
+    repo.commit.setAllowEmpty(true).setMessage(
+      s"$description\n\nThis is the long form description of my change\n\nversion: $version\nresolves: $reference"
+    ).call()
+  }
+
+  private def commitToRepoWithOnlyDescription(repo: Git, description: String): Unit = {
+    repo.commit.setAllowEmpty(true).setMessage(
+      s"$description\n\nThis is the long form description of my change"
     ).call()
   }
 }
