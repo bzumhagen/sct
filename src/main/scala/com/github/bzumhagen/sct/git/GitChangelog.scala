@@ -3,7 +3,12 @@ package com.github.bzumhagen.sct.git
 import java.time.{Instant, ZoneId}
 
 import better.files.File
-import com.github.bzumhagen.sct.{Changelog, ChangelogChange, ChangelogConfiguration}
+import com.github.bzumhagen.sct.{
+  ChangeGroup,
+  Changelog,
+  ChangelogChange,
+  ChangelogConfiguration
+}
 import com.github.zafarkhaja.semver.Version
 import com.typesafe.scalalogging.Logger
 import org.eclipse.jgit.api.Git
@@ -14,22 +19,30 @@ import org.fusesource.scalate._
 
 import scala.util.matching.Regex
 
-class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends Changelog {
+class GitChangelog(val config: ChangelogConfiguration, val gitDir: File)
+    extends Changelog {
   private val logger = Logger[GitChangelog]
 
-  case class MyVersion(version: String, date: String, tag: String, description: String)
+  case class MyVersion(version: String,
+                       date: String,
+                       tag: String,
+                       description: String)
 
   override def getChanges: Seq[ChangelogChange] = {
     val gitRepository = Git.open(gitDir.toJava)
     val gitLog = gitRepository.log().call().asScala
 
+    gitRepository.close()
     gitLog.flatMap(buildChange).toSeq
   }
 
-  override def generateMarkdown(file: File, changes: Seq[ChangelogChange]): File = {
+  override def generateMarkdown(file: File,
+                                changes: Seq[ChangelogChange]): File = {
     val engine = new TemplateEngine
-    val binding = Map("changes" -> changes)
-    val output = engine.layout("/changelogTemplate.ssp", binding)
+    val changeBindings = buildChangeBindings(changes)
+    val nameBinding = Map("name" -> config.name)
+    val template = if(config.smartGrouping) "/changelogTemplate.ssp" else "/verboseChangelogTemplate.ssp"
+    val output = engine.layout(template, nameBinding ++ changeBindings)
     file.writeText(output)
   }
 
@@ -39,20 +52,23 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     val version = getVersionFromMessage(commitMessage)
     val tag = getMatchFor(config.tagPattern, commitMessage)
     val reference = getMatchFor(config.referencePattern, commitMessage)
-    val date = Instant.ofEpochSecond(commit.getCommitTime).atZone(ZoneId.systemDefault).toLocalDate
-    val dateTime = Instant.ofEpochSecond(commit.getCommitTime).atZone(ZoneId.systemDefault)
+    val date = Instant
+      .ofEpochSecond(commit.getCommitTime)
+      .atZone(ZoneId.systemDefault)
+      .toLocalDate
 
     (version, tag) match {
       case (Some(v), Some(t)) =>
         Some(ChangelogChange(description, v, t, reference, date))
-      case (None, Some(_))    =>
+      case (None, Some(_)) =>
         logger.debug(s"Didn't find version in commit message [$commitMessage]")
         None
-      case (Some(_), None)    =>
+      case (Some(_), None) =>
         logger.debug(s"Didn't find tag in commit message [$commitMessage]")
         None
-      case _                  =>
-        logger.debug(s"Didn't find tag or version in commit message [$commitMessage]")
+      case _ =>
+        logger.debug(
+          s"Didn't find tag or version in commit message [$commitMessage]")
         None
     }
   }
@@ -62,8 +78,57 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     version.map(Version.valueOf)
   }
 
-  private def getMatchFor(regex: Regex, data: String): Option[String] = data match {
-    case regex(matchingValue) => Some(matchingValue)
-    case _                    => None
-  }
+  private def getMatchFor(regex: Regex, data: String): Option[String] =
+    data match {
+      case regex(matchingValue) => Some(matchingValue)
+      case _ => None
+    }
+
+  private def buildChangeBindings(
+      changes: Seq[ChangelogChange]): Map[String, Any] =
+    if (config.smartGrouping) {
+      val latestVersion = changes.maxBy(_.version).version
+      val latestPatchChanges = changes.filter { change =>
+        change.version.getMajorVersion == latestVersion.getMajorVersion &&
+        change.version.getMinorVersion == latestVersion.getMinorVersion &&
+        change.version.getPatchVersion > 0
+      }
+      val latestMinorChanges = changes.filter { change =>
+        change.version.getMajorVersion == latestVersion.getMajorVersion &&
+        (
+          (change.version.getMinorVersion == 0 && change.version.getPatchVersion > 0) ||
+          (change.version.getMinorVersion > 0 && change.version.getMinorVersion < latestVersion.getMinorVersion) ||
+          (change.version.getMinorVersion == latestVersion.getMinorVersion && change.version.getPatchVersion == 0)
+        )
+      }
+      val latestMajorChanges = changes.filter { change =>
+        (
+          change.version.getMajorVersion == latestVersion.getMajorVersion - 1 &&
+          (change.version.getMinorVersion > 0 || change.version.getPatchVersion > 0)
+        ) ||
+        (
+          change.version.getMajorVersion == latestVersion.getMajorVersion &&
+          change.version.getMinorVersion == 0 &&
+          change.version.getPatchVersion == 0
+        )
+      }
+      val otherMajorChangeGroups =
+        (0 until latestVersion.getMajorVersion - 1).map { majorVersion =>
+          ChangeGroup.load(
+            changes.filter { change =>
+              change.version.getMajorVersion == majorVersion ||
+              change.version == Version.valueOf(s"${majorVersion + 1}.0.0")
+            }
+          )
+        }.toSeq
+
+      Map(
+        "latestPatchChangeGroup" -> ChangeGroup.load(latestPatchChanges),
+        "latestMinorChangeGroup" -> ChangeGroup.load(latestMinorChanges),
+        "latestMajorChangeGroup" -> ChangeGroup.load(latestMajorChanges),
+        "otherMajorChangeGroups" -> otherMajorChangeGroups
+      )
+    } else {
+      Map("changes" -> changes)
+    }
 }

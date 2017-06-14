@@ -1,4 +1,5 @@
-# Demo Change Log
+<%@ val name: String %>
+# ${name} Change Log
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
@@ -6,10 +7,43 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <% import com.github.bzumhagen.sct.ChangelogChange %>
 <% import com.github.bzumhagen.sct.ChangelogChange._ %>
-<%@ val changes: List[ChangelogChange] = List() %>
+<% import com.github.bzumhagen.sct.ChangeGroup %>
+<% import com.github.bzumhagen.sct.ChangeGroup._ %>
+<%@ val latestPatchChangeGroup: ChangeGroup %>
+<%@ val latestMinorChangeGroup: ChangeGroup %>
+<%@ val latestMajorChangeGroup: ChangeGroup %>
+<%@ val otherMajorChangeGroups: Seq[ChangeGroup] = Seq() %>
+## [${latestPatchChangeGroup.version}] - ${latestPatchChangeGroup.date}
+#for ((changeType, changes) <- latestPatchChangeGroup.typeToChanges)
+### ${changeType}
 #for (change <- changes)
-## [${change.version}] - ${change.date}
-### ${change.changeType}
 - ${change.description}
+#end
+#end
+
+## [${latestMinorChangeGroup.version}] - ${latestMinorChangeGroup.date}
+#for ((changeType, changes) <- latestMinorChangeGroup.typeToChanges)
+### ${changeType}
+#for (change <- changes)
+- ${change.description}
+#end
+#end
+
+## [${latestMajorChangeGroup.version}] - ${latestMajorChangeGroup.date}
+#for ((changeType, changes) <- latestMajorChangeGroup.typeToChanges)
+### ${changeType}
+#for (change <- changes)
+- ${change.description}
+#end
+#end
+
+#for (changeGroup <- otherMajorChangeGroups)
+## [${changeGroup.version}] - ${changeGroup.date}
+#for ((changeType, changes) <- changeGroup.typeToChanges)
+### ${changeType}
+#for (change <- changes)
+- ${change.description}
+#end
+#end
 
 #end
