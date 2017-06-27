@@ -4,8 +4,8 @@ scala:
 jdk:
 - oraclejdk8
 before_install:
-- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out local.secring.gpg -d
-- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out local.pubring.gpg -d
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.asc.enc -out local.secring.asc -d
+- openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.asc.enc -out local.pubring.asc -d
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in credentials.sbt.enc -out local.credentials.sbt -d
 script:
 - sbt clean coverage test coverageReport && sbt coverageAggregate
