@@ -21,3 +21,40 @@ libraryDependencies ++= Seq(
 )
 
 coverageEnabled := true
+
+pgpSecretRing := file("local.secring.asc")
+
+pgpPublicRing := file("local.pubring.asc")
+
+publishMavenStyle := true
+
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
+
+publishArtifact in Test := false
+
+pomIncludeRepository := { _ => false }
+
+licenses := Seq("MIT-style" -> url("https://opensource.org/licenses/MIT"))
+
+homepage := Some(url("https://github.com/bzumhagen"))
+
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/bzumhagen/sct"),
+    "scm:git@github.com:bzumhagen/sct.git"
+  )
+)
+
+developers := List(
+  Developer(
+    id    = "bzumhagen",
+    name  = "Ben Zumhagen",
+    email = "bzumhagen@gmail.com",
+    url   = url("https://github.com/bzumhagen")
+  )
+)
