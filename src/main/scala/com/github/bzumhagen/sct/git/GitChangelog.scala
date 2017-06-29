@@ -3,24 +3,19 @@ package com.github.bzumhagen.sct.git
 import java.time.{Instant, ZoneId}
 
 import better.files.File
-import com.github.bzumhagen.sct.{
-  ChangeGroup,
-  Changelog,
-  ChangelogChange,
-  ChangelogConfiguration
-}
+import com.github.bzumhagen.sct.{ChangeGroup, Changelog, ChangelogChange, ChangelogConfiguration}
 import com.github.zafarkhaja.semver.Version
-import com.typesafe.scalalogging.Logger
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
 
 import scala.collection.JavaConverters._
 import org.fusesource.scalate._
+import org.slf4j.LoggerFactory
 
 import scala.util.matching.Regex
 
 class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends Changelog {
-  private val logger = Logger[GitChangelog]
+  private val logger = LoggerFactory.getLogger(classOf[GitChangelog])
 
   override def getChanges: Seq[ChangelogChange] = {
     val gitRepository = Git.open(gitDir.toJava)
