@@ -8,9 +8,11 @@ before_install:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.asc.enc -out local.pubring.asc -d
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in credentials.sbt.enc -out local.credentials.sbt -d
 script:
-- sbt clean coverage test coverageReport && sbt coverageAggregate
+- sbt clean coverage test coverageReport coverageAggregate
 after_success:
-- sbt coveralls "+ publish-signed sonatypeRelease"
+- sbt coveralls
+- sbt "+ publish-signed"
+- sbt "+ sonatypeRelease"
 env:
   global:
     secure: jCH+Q32wtrntJJuqtMBXbmJEVzjIw2hXEBac/xaUMnEoaqsBrqlALXI3uOQ3N5Wldrz6n0zs47ZHSpylYRRKoIhqyuT6IENmFNlkScWKWY1Q6HCFUmVwmHIbsuXdr7ZBji6I/VEEX/ZsrjUajVl4mPBBoYdx5B98AHcYkThxt8ZtQM9sscvVNSusgOlO8X2NNsLpKSEP90olzrGkNpsSGa1+YS+F6GZmHfbt4AZZL91e9wNWpBjK7RNCd8C8PoqG/KolIGy1OIi52qqiLJe1H1WGhVw/mdyXFo6s+Px5UndXIkF4qwlBef9+qN40DGxNRKixWQ/ll91/N9jUCUTOZZYxlgJemASWBg60cs4M1tHCuwuqGkXNahhcCrd/PesL3RXO2KunscPL4ZL4w51gOROMqNyO6v6YpDHiIHsf6NCHu0XnNAzwMxWNjgm0jHP6TBKd2XDYd1ciwqOq2Yw+y62l9rfRXT2FO2R6Zpnt5d8/Gbb/Pp+snO9eSXRJGcYTkuwDNJx52xDLQSF1n3sifItLu1Danu3LAzT8jzHSL7gqGv5rRy8jwqCtHG82RyGBr+uuYuSGJHqFi7OqxkK/UOHe7fbWqtvGIavxyptwVExm+Rs57raYRRDs6Kp3KZQuQ+aoB6WfA9iEQMb6AbNDPMqxPP46OcO6Sl7PXStei0g=

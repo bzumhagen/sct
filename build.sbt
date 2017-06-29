@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.12" % Test
 )
 
-libraryDependencies <++= scalaVersion ( sv => Seq(betterFiles(sv)) )
+libraryDependencies ++= { Seq(betterFiles(scalaVersion.value)) }
 
 def betterFiles(scalaVersion: String) = scalaVersion match {
   case "2.12.1"  => "com.github.pathikrit" %% "better-files" % "3.0.0"
