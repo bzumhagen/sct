@@ -2,7 +2,7 @@ name := "sct"
 
 organization := "com.github.bzumhagen"
 
-version := "0.5.0"
+version := "0.6.0"
 
 scalaVersion := "2.12.1"
 
@@ -16,6 +16,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
   "org.scalatra.scalate" %% "scalate-core" % "1.8.0",
   "org.scalactic" %% "scalactic" % "3.0.1",
+  "com.github.scopt" %% "scopt" % "3.6.0",
+  "com.github.pathikrit" %% "better-files" % "3.0.0",
   "org.scalatest" %% "scalatest" % "3.0.1" % Test,
   "junit" % "junit" % "4.12" % Test
 )

@@ -4,46 +4,49 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
-
 <% import com.github.bzumhagen.sct.ChangelogChange %>
 <% import com.github.bzumhagen.sct.ChangelogChange._ %>
 <% import com.github.bzumhagen.sct.ChangeGroup %>
 <% import com.github.bzumhagen.sct.ChangeGroup._ %>
-<%@ val latestPatchChangeGroup: ChangeGroup %>
-<%@ val latestMinorChangeGroup: ChangeGroup %>
-<%@ val latestMajorChangeGroup: ChangeGroup %>
-<%@ val otherMajorChangeGroups: Seq[ChangeGroup] = Seq() %>
-## [${latestPatchChangeGroup.version}] - ${latestPatchChangeGroup.date}
-#for ((changeType, changes) <- latestPatchChangeGroup.typeToChanges)
+<%@ val latestPatchChangeGroupOption: Option[ChangeGroup] %>
+<%@ val latestMinorChangeGroupOption: Option[ChangeGroup] %>
+<%@ val latestMajorChangeGroupOption: Option[ChangeGroup] %>
+<%@ val otherMajorChangeGroupOptions: Seq[Option[ChangeGroup]] = Seq() %>
+#if (latestPatchChangeGroupOption.isDefined)
+## [${latestPatchChangeGroupOption.get.version}] - ${latestPatchChangeGroupOption.get.date}
+#for ((changeType, changes) <- latestPatchChangeGroupOption.get.typeToChanges)
 ### ${changeType}
 #for (change <- changes)
 - ${change.description}
 #end
 #end
-
-## [${latestMinorChangeGroup.version}] - ${latestMinorChangeGroup.date}
-#for ((changeType, changes) <- latestMinorChangeGroup.typeToChanges)
+#end
+#if (latestMinorChangeGroupOption.isDefined)
+## [${latestMinorChangeGroupOption.get.version}] - ${latestMinorChangeGroupOption.get.date}
+#for ((changeType, changes) <- latestMinorChangeGroupOption.get.typeToChanges)
 ### ${changeType}
 #for (change <- changes)
 - ${change.description}
 #end
 #end
-
-## [${latestMajorChangeGroup.version}] - ${latestMajorChangeGroup.date}
-#for ((changeType, changes) <- latestMajorChangeGroup.typeToChanges)
+#end
+#if (latestMajorChangeGroupOption.isDefined)
+## [${latestMajorChangeGroupOption.get.version}] - ${latestMajorChangeGroupOption.get.date}
+#for ((changeType, changes) <- latestMajorChangeGroupOption.get.typeToChanges)
 ### ${changeType}
 #for (change <- changes)
 - ${change.description}
 #end
 #end
-
-#for (changeGroup <- otherMajorChangeGroups)
-## [${changeGroup.version}] - ${changeGroup.date}
-#for ((changeType, changes) <- changeGroup.typeToChanges)
+#end
+#for (changeGroupOption <- otherMajorChangeGroupOptions)
+#if (changeGroupOption.isDefined)
+## [${changeGroupOption.get.version}] - ${changeGroupOption.get.date}
+#for ((changeType, changes) <- changeGroupOption.get.typeToChanges)
 ### ${changeType}
 #for (change <- changes)
 - ${change.description}
 #end
 #end
-
+#end
 #end

@@ -25,7 +25,7 @@ class ChangeGroupTest extends FlatSpec with Matchers {
       "Changed" -> changedChanges
     )
 
-    val actualChangeGroup = ChangeGroup.load(addedChanges ++ changedChanges)
+    val actualChangeGroup = ChangeGroup.load(addedChanges ++ changedChanges).get
     actualChangeGroup.version shouldBe expectedVersion
     actualChangeGroup.date shouldBe expectedDate
     actualChangeGroup.typeToChanges shouldBe expectedTypeToChanges

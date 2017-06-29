@@ -5,13 +5,19 @@ import java.time.LocalDate
 import com.github.zafarkhaja.semver.Version
 
 object ChangeGroup {
-  def load(changes: Seq[ChangelogChange]): ChangeGroup = {
-    val latestChange = changes.maxBy(_.version)
-    ChangeGroup(
-      version = latestChange.version,
-      date = latestChange.date,
-      typeToChanges = changes.groupBy(_.changeType)
-    )
+  def load(changes: Seq[ChangelogChange]): Option[ChangeGroup] = {
+    if(changes.nonEmpty) {
+      val latestChange = changes.maxBy(_.version)
+      Some(
+        ChangeGroup(
+          version = latestChange.version,
+          date = latestChange.date,
+          typeToChanges = changes.groupBy(_.changeType)
+        )
+      )
+    } else {
+      None
+    }
   }
 }
 

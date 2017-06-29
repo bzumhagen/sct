@@ -19,14 +19,8 @@ import org.fusesource.scalate._
 
 import scala.util.matching.Regex
 
-class GitChangelog(val config: ChangelogConfiguration, val gitDir: File)
-    extends Changelog {
+class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends Changelog {
   private val logger = Logger[GitChangelog]
-
-  case class MyVersion(version: String,
-                       date: String,
-                       tag: String,
-                       description: String)
 
   override def getChanges: Seq[ChangelogChange] = {
     val gitRepository = Git.open(gitDir.toJava)
@@ -36,8 +30,7 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File)
     gitLog.flatMap(buildChange).toSeq
   }
 
-  override def generateMarkdown(file: File,
-                                changes: Seq[ChangelogChange]): File = {
+  override def generateMarkdown(file: File, changes: Seq[ChangelogChange]): File = {
     val engine = new TemplateEngine
     val changeBindings = buildChangeBindings(changes)
     val nameBinding = Map("name" -> config.name)
@@ -98,7 +91,7 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File)
         (
           (change.version.getMinorVersion == 0 && change.version.getPatchVersion > 0) ||
           (change.version.getMinorVersion > 0 && change.version.getMinorVersion < latestVersion.getMinorVersion) ||
-          (change.version.getMinorVersion == latestVersion.getMinorVersion && change.version.getPatchVersion == 0)
+          (change.version.getMinorVersion != 0 && change.version.getMinorVersion == latestVersion.getMinorVersion && change.version.getPatchVersion == 0)
         )
       }
       val latestMajorChanges = changes.filter { change =>
@@ -120,13 +113,13 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File)
               change.version == Version.valueOf(s"${majorVersion + 1}.0.0")
             }
           )
-        }.toSeq
+        }
 
       Map(
-        "latestPatchChangeGroup" -> ChangeGroup.load(latestPatchChanges),
-        "latestMinorChangeGroup" -> ChangeGroup.load(latestMinorChanges),
-        "latestMajorChangeGroup" -> ChangeGroup.load(latestMajorChanges),
-        "otherMajorChangeGroups" -> otherMajorChangeGroups
+        "latestPatchChangeGroupOption" -> ChangeGroup.load(latestPatchChanges),
+        "latestMinorChangeGroupOption" -> ChangeGroup.load(latestMinorChanges),
+        "latestMajorChangeGroupOption" -> ChangeGroup.load(latestMajorChanges),
+        "otherMajorChangeGroupOptions" -> otherMajorChangeGroups
       )
     } else {
       Map("changes" -> changes)
