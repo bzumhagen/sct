@@ -199,4 +199,13 @@ class GitChangelogTest extends FlatSpec with Matchers {
     val actualChanges = gitChangelog.getChanges
     gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
+
+  it should "fail if no changes are provided to markdown generation" in {
+    val gitChangelog = new GitChangelog(DefaultConfiguration, File.newTemporaryDirectory())
+    val changelogFile = File.newTemporaryFile("changelogTestFile")
+
+    assertThrows[IllegalArgumentException] {
+      gitChangelog.generateMarkdown(changelogFile, Seq())
+    }
+  }
 }

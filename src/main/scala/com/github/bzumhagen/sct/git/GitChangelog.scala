@@ -26,6 +26,8 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
   }
 
   override def generateMarkdown(file: File, changes: Seq[ChangelogChange]): File = {
+    require(changes.nonEmpty, "Cannot generate markdown without changes")
+
     val engine = new TemplateEngine
     val changeBindings = buildChangeBindings(changes)
     val nameBinding = Map("name" -> config.name)
@@ -72,8 +74,7 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
       case _ => None
     }
 
-  private def buildChangeBindings(
-      changes: Seq[ChangelogChange]): Map[String, Any] =
+  private def buildChangeBindings(changes: Seq[ChangelogChange]): Map[String, Any] =
     if (config.smartGrouping) {
       val latestVersion = changes.maxBy(_.version).version
       val latestPatchChanges = changes.filter { change =>

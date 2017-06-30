@@ -2,7 +2,7 @@ name := "sct"
 
 organization := "com.github.bzumhagen"
 
-version := "0.6.0"
+version := "0.7.0"
 
 scalaVersion := "2.12.1"
 
@@ -30,8 +30,6 @@ def betterFiles(scalaVersion: String) = scalaVersion match {
   case "2.11.11" => "com.github.pathikrit" %% "better-files" % "2.17.1"
   case _         => "com.github.pathikrit" %% "better-files" % "2.17.0"
 }
-
-coverageEnabled := true
 
 pgpSecretRing := file("local.secring.asc")
 

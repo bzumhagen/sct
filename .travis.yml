@@ -9,8 +9,8 @@ before_install:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in credentials.sbt.enc -out local.credentials.sbt -d
 script:
 - sbt clean coverage test coverageReport coverageAggregate
-after_success:
 - sbt coveralls
+- sbt clean compile
 - sbt "+ publish-signed"
 - sbt "+ sonatypeRelease"
 env:
