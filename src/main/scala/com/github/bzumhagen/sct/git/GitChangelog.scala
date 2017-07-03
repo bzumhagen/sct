@@ -14,9 +14,16 @@ import org.slf4j.LoggerFactory
 
 import scala.util.matching.Regex
 
+/** A changelog for a git repository.
+  *
+  *  @constructor create a new git changelog with a config and directory.
+  *  @param config changelog configuration
+  *  @param gitDir directory containing the git repository
+  */
 class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends Changelog {
   private val logger = LoggerFactory.getLogger(classOf[GitChangelog])
 
+  /** Get all changes from git repository which match the mandatory criteria (i.e. contain version and specified tag) */
   override def getChanges: Seq[ChangelogChange] = {
     val gitRepository = Git.open(gitDir.toJava)
     val gitLog = gitRepository.log().call().asScala
@@ -25,14 +32,22 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     gitLog.flatMap(buildChange).toSeq
   }
 
+  /** Generate a markdown file given a file and a non-empty sequence of changes.
+    *
+    *  @param file file to write markdown into
+    *  @param changes sequence of changes to generate markdown for
+    */
   override def generateMarkdown(file: File, changes: Seq[ChangelogChange]): File = {
     require(changes.nonEmpty, "Cannot generate markdown without changes")
 
     val engine = new TemplateEngine
     val changeBindings = buildChangeBindings(changes)
-    val nameBinding = Map("name" -> config.name)
+    val defaultBindings = Map(
+      "name" -> config.name,
+      "showReference" -> config.showReference
+    )
     val template = if(config.smartGrouping) "/changelogTemplate.ssp" else "/verboseChangelogTemplate.ssp"
-    val output = engine.layout(template, nameBinding ++ changeBindings)
+    val output = engine.layout(template, defaultBindings ++ changeBindings)
     file.writeText(output)
   }
 

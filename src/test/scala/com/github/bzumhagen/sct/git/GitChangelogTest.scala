@@ -155,9 +155,32 @@ class GitChangelogTest extends FlatSpec with Matchers {
     gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
 
-  it should "generate a verbose markdown file properly" in {
+  it should "generate a smartGrouped markdown file properly with reference" in {
     val (dir, repo) = initializeTemporaryGitRepo
-    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = false), dir)
+    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = true, showReference = true), dir)
+    val change = ChangelogChange("Ability to specify regex patterns for change elements", Version.valueOf("1.0.0"), "Added", Some("XYZ-123"), Today)
+    val changelogFile = File.newTemporaryFile("changelogTestFile")
+    val expectedMarkdown =
+      s"""# SCT Change Log
+         |All notable changes to this project will be documented in this file.
+         |
+      |The format is based on [Keep a Changelog](http://keepachangelog.com/)
+         |and this project adheres to [Semantic Versioning](http://semver.org/).
+         |
+      |## [${change.version}] - ${change.date}
+         |### ${change.changeType}
+         |- (${change.reference.get}) ${change.description}
+         |""".stripMargin
+
+    commitToRepo(repo, change.description, change.version, change.changeType, change.reference.getOrElse(""))
+
+    val actualChanges = gitChangelog.getChanges
+    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+  }
+
+  it should "generate a verbose markdown file properly with references" in {
+    val (dir, repo) = initializeTemporaryGitRepo
+    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = false, showReference = true), dir)
     val changes = Seq(
       ChangelogChange("Create project", Version.valueOf("1.0.0"), "Added", Some("XYZ-123"), Today),
       ChangelogChange("Add some functionality", Version.valueOf("1.1.0"), "Added", Some("XYZ-124"), Today),
@@ -175,24 +198,69 @@ class GitChangelogTest extends FlatSpec with Matchers {
         |
         |## [2.0.1] - $Today
         |### Changed
-        |- Change some behavior
+        |- (XYZ-127) Change some behavior
         |
         |## [2.0.0] - $Today
         |### Removed
-        |- Remove some deprecated functionality
+        |- (XYZ-126) Remove some deprecated functionality
         |
         |## [1.1.1] - $Today
         |### Deprecated
-        |- Deprecate some functionality
+        |- (XYZ-125) Deprecate some functionality
         |
         |## [1.1.0] - $Today
         |### Added
-        |- Add some functionality
+        |- (XYZ-124) Add some functionality
         |
         |## [1.0.0] - $Today
         |### Added
-        |- Create project
+        |- (XYZ-123) Create project
         |""".stripMargin
+
+    changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, change.reference.get))
+
+    val actualChanges = gitChangelog.getChanges
+    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+  }
+
+  it should "generate a verbose markdown file properly without references" in {
+    val (dir, repo) = initializeTemporaryGitRepo
+    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = false, showReference = false), dir)
+    val changes = Seq(
+      ChangelogChange("Create project", Version.valueOf("1.0.0"), "Added", Some("XYZ-123"), Today),
+      ChangelogChange("Add some functionality", Version.valueOf("1.1.0"), "Added", Some("XYZ-124"), Today),
+      ChangelogChange("Deprecate some functionality", Version.valueOf("1.1.1"), "Deprecated", Some("XYZ-125"), Today),
+      ChangelogChange("Remove some deprecated functionality", Version.valueOf("2.0.0"), "Removed", Some("XYZ-126"), Today),
+      ChangelogChange("Change some behavior", Version.valueOf("2.0.1"), "Changed", Some("XYZ-127"), Today)
+    )
+    val changelogFile = File.newTemporaryFile("changelogTestFile")
+    val expectedMarkdown =
+      s"""# SCT Change Log
+         |All notable changes to this project will be documented in this file.
+         |
+        |The format is based on [Keep a Changelog](http://keepachangelog.com/)
+         |and this project adheres to [Semantic Versioning](http://semver.org/).
+         |
+        |## [2.0.1] - $Today
+         |### Changed
+         |- Change some behavior
+         |
+        |## [2.0.0] - $Today
+         |### Removed
+         |- Remove some deprecated functionality
+         |
+        |## [1.1.1] - $Today
+         |### Deprecated
+         |- Deprecate some functionality
+         |
+        |## [1.1.0] - $Today
+         |### Added
+         |- Add some functionality
+         |
+        |## [1.0.0] - $Today
+         |### Added
+         |- Create project
+         |""".stripMargin
 
     changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, change.reference.get))
 

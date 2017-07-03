@@ -12,12 +12,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <%@ val latestMinorChangeGroupOption: Option[ChangeGroup] %>
 <%@ val latestMajorChangeGroupOption: Option[ChangeGroup] %>
 <%@ val otherMajorChangeGroupOptions: Seq[Option[ChangeGroup]] = Seq() %>
+<%@ val showReference: Boolean = false %>
 #if (latestPatchChangeGroupOption.isDefined)
 ## [${latestPatchChangeGroupOption.get.version}] - ${latestPatchChangeGroupOption.get.date}
 #for ((changeType, changes) <- latestPatchChangeGroupOption.get.typeToChanges)
 ### ${changeType}
-#for (change <- changes)
-- ${change.description}
+#for (change <- changes)#if (showReference)-#if (change.reference.isDefined) (${change.reference.get}) #end ${change.description}
+#else- ${change.description}
+#end
 #end
 #end
 #end
@@ -25,8 +27,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [${latestMinorChangeGroupOption.get.version}] - ${latestMinorChangeGroupOption.get.date}
 #for ((changeType, changes) <- latestMinorChangeGroupOption.get.typeToChanges)
 ### ${changeType}
-#for (change <- changes)
-- ${change.description}
+#for (change <- changes)#if (showReference)-#if (change.reference.isDefined) (${change.reference.get}) #end ${change.description}
+#else- ${change.description}
+#end
 #end
 #end
 #end
@@ -34,8 +37,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [${latestMajorChangeGroupOption.get.version}] - ${latestMajorChangeGroupOption.get.date}
 #for ((changeType, changes) <- latestMajorChangeGroupOption.get.typeToChanges)
 ### ${changeType}
-#for (change <- changes)
-- ${change.description}
+#for (change <- changes)#if (showReference)-#if (change.reference.isDefined) (${change.reference.get}) #end ${change.description}
+#else- ${change.description}
+#end
 #end
 #end
 #end
@@ -44,8 +48,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [${changeGroupOption.get.version}] - ${changeGroupOption.get.date}
 #for ((changeType, changes) <- changeGroupOption.get.typeToChanges)
 ### ${changeType}
-#for (change <- changes)
-- ${change.description}
+#for (change <- changes)#if (showReference)-#if (change.reference.isDefined) (${change.reference.get}) #end ${change.description}
+#else- ${change.description}
+#end
 #end
 #end
 #end

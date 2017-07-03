@@ -4,7 +4,7 @@ import better.files.File
 import com.github.bzumhagen.sct.git.GitChangelog
 import com.typesafe.config.ConfigFactory
 
-
+/** Object for main execution of the program */
 object BuildChangelog extends App {
   case class Arguments(pathToRepository: String = ".", pathToConfiguration: Option[String] = None)
 
@@ -25,6 +25,10 @@ object BuildChangelog extends App {
     }
   }
 
+  /** Generate a changelog file given some arguments.
+    *
+    *  @param arguments arguments for generating a changelog file
+    */
   def generateChangelog(arguments: Arguments): Unit = {
     val config =
       if(arguments.pathToConfiguration.isDefined) {
