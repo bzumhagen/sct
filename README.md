@@ -79,7 +79,7 @@ We use [SemVer](http://semver.org/) for versioning.
 
 * **Ben Zumhagen** - *Initial work* - [Github](https://github.com/bzumhagen)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/bzumhagen/sct/contributors) who participated in this project.
 
 ## License
 
