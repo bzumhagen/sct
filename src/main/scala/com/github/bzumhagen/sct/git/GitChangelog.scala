@@ -7,11 +7,10 @@ import com.github.bzumhagen.sct._
 import com.github.zafarkhaja.semver.Version
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
-
-import scala.collection.JavaConverters._
 import org.fusesource.scalate._
 import org.slf4j.LoggerFactory
 
+import scala.collection.JavaConverters._
 import scala.util.matching.Regex
 
 /** A changelog for a git repository.
@@ -41,10 +40,9 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     require(changes.nonEmpty, "Cannot generate markdown without changes")
 
     val engine = new TemplateEngine
-    val changeBinding = getChangeBinding(changes)
+    val changeBinding = new SmartGroupChangeBinding(getTemplate, changes)
     val defaultBindings = Map(
-      "name" -> config.name,
-      "showReference" -> config.showReference
+      "name" -> config.name
     )
     val output = engine.layout(changeBinding.template, defaultBindings ++ changeBinding.buildChangeBindings)
     file.writeText(output)
@@ -55,7 +53,7 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     val description = commit.getShortMessage
     val version = getVersionFromMessage(commitMessage)
     val tag = getMatchFor(config.tagPattern, commitMessage)
-    val reference = getMatchFor(config.referencePattern, commitMessage)
+    val reference = getMatchFor(config.referencePattern, commitMessage).map(ChangelogReference)
     val date = Instant
       .ofEpochSecond(commit.getCommitTime)
       .atZone(ZoneId.systemDefault)
@@ -88,10 +86,11 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
       case _ => None
     }
 
-  private def getChangeBinding(changes: Seq[ChangelogChange]): ChangeBinding =
-    if (config.smartGrouping) {
-      new SmartGroupChangeBinding("/changelogTemplate.ssp", changes)
-    } else {
-      new VerboseChangeBinding("/verboseChangelogTemplate.ssp", changes)
-    }
+  private def getTemplate =
+    config.templateFile.getOrElse(
+      if (config.smartGrouping) {
+        "/templates/markdown.mustache"
+      } else {
+        "/templates/verbose_markdown.mustache"
+      })
 }

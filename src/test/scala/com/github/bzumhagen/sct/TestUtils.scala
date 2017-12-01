@@ -14,9 +14,9 @@ object TestUtils {
     gitDir -> Git.init.setDirectory(gitDir.toJava).call
   }
 
-  def commitToRepo(repo: Git, description: String, version: Version, tag: String, reference: String): Unit = {
+  def commitToRepo(repo: Git, description: String, version: Version, tag: String, reference: Option[ChangelogReference]): Unit = {
     repo.commit.setAllowEmpty(true).setMessage(
-      s"$description\n\nThis is the long form description of my change\n\nversion: $version\ntag: $tag\nresolves: $reference"
+      s"$description\n\nThis is the long form description of my change\n\nversion: $version\ntag: $tag\nresolves: ${reference.map(_.value).getOrElse("")}"
     ).call()
   }
 

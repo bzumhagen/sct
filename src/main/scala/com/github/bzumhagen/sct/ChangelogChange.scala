@@ -12,4 +12,10 @@ import com.github.zafarkhaja.semver.Version
   * @param reference change reference (i.e. XYZ-123)
   * @param date change date
   */
-case class ChangelogChange(description: String, version: Version, changeType: String, reference: Option[String], date: LocalDate)
+object ChangelogChange {
+  def apply(description: String, version: Version, changeType: String, date: LocalDate, reference: Option[String] = None) =
+    new ChangelogChange(description, version, changeType, reference.map(ChangelogReference), date)
+}
+case class ChangelogChange(description: String, version: Version, changeType: String, reference: Option[ChangelogReference], date: LocalDate)
+
+case class ChangelogReference(value: String)

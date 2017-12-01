@@ -35,9 +35,10 @@ class BuildChangelogTest extends FlatSpec with Matchers {
         |## [${expectedChange.version}] - ${expectedChange.date}
         |### ${expectedChange.changeType}
         |- ${expectedChange.description}
+        |***
         |""".stripMargin
 
-    commitToRepo(gitRepo, expectedChange.description, expectedChange.version, expectedChange.changeType, expectedChange.reference.getOrElse(""))
+    commitToRepo(gitRepo, expectedChange.description, expectedChange.version, expectedChange.changeType, expectedChange.reference)
     BuildChangelog.main(Array("-r", repoDir.pathAsString))
 
     expectedFile.contentAsString shouldBe expectedContent

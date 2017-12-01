@@ -1,7 +1,7 @@
 package com.github.bzumhagen.sct
 
+import com.github.bzumhagen.sct.ChangeGroup.load
 import com.github.zafarkhaja.semver.Version
-
 
 class SmartGroupChangeBinding(val template: String, val changes: Seq[ChangelogChange]) extends ChangeBinding {
   require(changes.nonEmpty, "Cannot build change bindings without changes")
@@ -32,21 +32,24 @@ class SmartGroupChangeBinding(val template: String, val changes: Seq[ChangelogCh
             change.version.getPatchVersion == 0
           )
     }
-    val otherMajorChangeGroups =
+    val otherMajorChangeGroups: List[Option[ChangeGroup]] =
       (0 until latestVersion.getMajorVersion - 1).map { majorVersion =>
-        ChangeGroup.load(
+        load(
           changes.filter { change =>
             change.version.getMajorVersion == majorVersion ||
               change.version == Version.valueOf(s"${majorVersion + 1}.0.0")
           }
         )
-      }
+      }.toList
 
+    val groups = List(
+      load(latestPatchChanges),
+      load(latestMinorChanges),
+      load(latestMajorChanges)
+    ) ::: otherMajorChangeGroups
     Map(
-      "latestPatchChangeGroupOption" -> ChangeGroup.load(latestPatchChanges),
-      "latestMinorChangeGroupOption" -> ChangeGroup.load(latestMinorChanges),
-      "latestMajorChangeGroupOption" -> ChangeGroup.load(latestMajorChanges),
-      "otherMajorChangeGroupOptions" -> otherMajorChangeGroups
+      "changeGroups" -> groups.flatten,
+      "changes"      -> changes
     )
   }
 }

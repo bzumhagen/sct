@@ -2,7 +2,7 @@ name := "sct"
 
 organization := "com.github.bzumhagen"
 
-version := "0.8.1"
+version := "0.8.2"
 
 scalaVersion := "2.12.1"
 
