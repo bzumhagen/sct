@@ -158,7 +158,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
 
   it should "generate a smartGrouped markdown file properly with reference" in {
     val (dir, repo) = initializeTemporaryGitRepo
-    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = true), dir)
+    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = true, showReference = true), dir)
     val change = ChangelogChange("Ability to specify regex patterns for change elements", Version.valueOf("1.0.0"), "Added", Today, Some("XYZ-123"))
     val changelogFile = File.newTemporaryFile("changelogTestFile")
     val expectedMarkdown =
@@ -182,7 +182,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
 
   it should "generate a verbose markdown file properly with references" in {
     val (dir, repo) = initializeTemporaryGitRepo
-    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = false), dir)
+    val gitChangelog = new GitChangelog(DefaultConfiguration.copy(smartGrouping = false, showReference = true), dir)
     val changes = Seq(
       ChangelogChange("Create project", Version.valueOf("1.0.0"), "Added", Today, Some("XYZ-123")),
       ChangelogChange("Add some functionality", Version.valueOf("1.1.0"), "Added", Today, Some("XYZ-124")),

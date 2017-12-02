@@ -14,6 +14,7 @@ object ChangelogConfiguration {
       referencePattern = config.getString("sct.patterns.reference").r,
       tags = config.getStringList("sct.tags").asScala.toSet,
       smartGrouping = config.getBoolean("sct.smartGrouping"),
+      showReference = config.getBoolean("sct.showReference"),
       templateFile = if (config.hasPath("sct.templateFile")) Some(config.getString("sct.templateFile")) else None
     )
   }
@@ -26,5 +27,6 @@ case class ChangelogConfiguration(
   referencePattern: Regex,
   tags: Set[String],
   smartGrouping: Boolean,
+  showReference: Boolean,
   templateFile: Option[String]
 )

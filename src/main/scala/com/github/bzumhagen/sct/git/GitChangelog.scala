@@ -42,7 +42,8 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     val engine = new TemplateEngine
     val changeBinding = new SmartGroupChangeBinding(getTemplate, changes)
     val defaultBindings = Map(
-      "name" -> config.name
+      "name" -> config.name,
+      "showReference" -> config.showReference
     )
     val output = engine.layout(changeBinding.template, defaultBindings ++ changeBinding.buildChangeBindings)
     file.writeText(output)
