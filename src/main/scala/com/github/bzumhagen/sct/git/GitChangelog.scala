@@ -40,7 +40,13 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     require(changes.nonEmpty, "Cannot generate changelog without changes")
 
     val engine = new TemplateEngine
-    val changeBinding = new SmartGroupChangeBinding(getTemplate, changes)
+    val template = getTemplate
+    val changeBinding =
+      if (config.smartGrouping) {
+        new SmartGroupChangeBinding(template, changes)
+      } else {
+        new VerboseChangeBinding(template, changes)
+      }
     val defaultBindings = Map(
       "name" -> config.name,
       "showReference" -> config.showReference
@@ -88,10 +94,5 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     }
 
   private def getTemplate =
-    config.templateFile.getOrElse(
-      if (config.smartGrouping) {
-        "/templates/markdown.mustache"
-      } else {
-        "/templates/verbose_markdown.mustache"
-      })
+    config.templateFile.getOrElse("/templates/markdown.mustache")
 }

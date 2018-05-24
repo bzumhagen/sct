@@ -187,6 +187,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
       ChangelogChange("Create project", Version.valueOf("1.0.0"), "Added", Today, Some("XYZ-123")),
       ChangelogChange("Add some functionality", Version.valueOf("1.1.0"), "Added", Today, Some("XYZ-124")),
       ChangelogChange("Deprecate some functionality", Version.valueOf("1.1.1"), "Deprecated", Today, Some("XYZ-125")),
+      ChangelogChange("Do some maintenance", Version.valueOf("1.1.1"), "Maintenance", Today, Some("XYZ-125")),
       ChangelogChange("Remove some deprecated functionality", Version.valueOf("2.0.0"), "Removed", Today, Some("XYZ-126")),
       ChangelogChange("Change some behavior", Version.valueOf("2.0.1"), "Changed", Today, Some("XYZ-127"))
     )
@@ -201,18 +202,25 @@ class GitChangelogTest extends FlatSpec with Matchers {
         |## [2.0.1] - $Today
         |### Changed
         |- (XYZ-127) Change some behavior
+        |***
         |## [2.0.0] - $Today
         |### Removed
         |- (XYZ-126) Remove some deprecated functionality
+        |***
         |## [1.1.1] - $Today
         |### Deprecated
         |- (XYZ-125) Deprecate some functionality
+        |### Maintenance
+        |- (XYZ-125) Do some maintenance
+        |***
         |## [1.1.0] - $Today
         |### Added
         |- (XYZ-124) Add some functionality
+        |***
         |## [1.0.0] - $Today
         |### Added
         |- (XYZ-123) Create project
+        |***
         |""".stripMargin
 
     changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, change.reference))
@@ -242,18 +250,23 @@ class GitChangelogTest extends FlatSpec with Matchers {
          |## [2.0.1] - $Today
          |### Changed
          |- Change some behavior
+         |***
          |## [2.0.0] - $Today
          |### Removed
          |- Remove some deprecated functionality
+         |***
          |## [1.1.1] - $Today
          |### Deprecated
          |- Deprecate some functionality
+         |***
          |## [1.1.0] - $Today
          |### Added
          |- Add some functionality
+         |***
          |## [1.0.0] - $Today
          |### Added
          |- Create project
+         |***
          |""".stripMargin
 
     changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, change.reference))
