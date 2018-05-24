@@ -31,13 +31,13 @@ class GitChangelog(val config: ChangelogConfiguration, val gitDir: File) extends
     gitLog.flatMap(buildChange).toSeq
   }
 
-  /** Generate a markdown file given a file and a non-empty sequence of changes.
+  /** Generate a file given a file and a non-empty sequence of changes.
     *
     *  @param file file to write markdown into
-    *  @param changes sequence of changes to generate markdown for
+    *  @param changes sequence of changes to build changelog with
     */
-  override def generateMarkdown(file: File, changes: Seq[ChangelogChange]): File = {
-    require(changes.nonEmpty, "Cannot generate markdown without changes")
+  override def generateChangelog(file: File, changes: Seq[ChangelogChange]): File = {
+    require(changes.nonEmpty, "Cannot generate changelog without changes")
 
     val engine = new TemplateEngine
     val changeBinding = new SmartGroupChangeBinding(getTemplate, changes)

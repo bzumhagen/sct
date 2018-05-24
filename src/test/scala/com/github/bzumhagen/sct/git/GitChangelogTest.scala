@@ -85,7 +85,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
     changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, change.reference))
 
     val actualChanges = gitChangelog.getChanges
-    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+    gitChangelog.generateChangelog(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
 
   it should "generate a smartGrouped markdown file properly for repositories without major versions" in {
@@ -129,7 +129,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
     changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, None))
 
     val actualChanges = gitChangelog.getChanges
-    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+    gitChangelog.generateChangelog(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
 
   it should "generate a smartGrouped markdown file properly for repositories with a single version" in {
@@ -153,7 +153,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
     commitToRepo(repo, change.description, change.version, change.changeType, change.reference)
 
     val actualChanges = gitChangelog.getChanges
-    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+    gitChangelog.generateChangelog(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
 
   it should "generate a smartGrouped markdown file properly with reference" in {
@@ -177,7 +177,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
     commitToRepo(repo, change.description, change.version, change.changeType, change.reference)
 
     val actualChanges = gitChangelog.getChanges
-    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+    gitChangelog.generateChangelog(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
 
   it should "generate a verbose markdown file properly with references" in {
@@ -218,7 +218,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
     changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, change.reference))
 
     val actualChanges = gitChangelog.getChanges
-    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+    gitChangelog.generateChangelog(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
 
   it should "generate a verbose markdown file properly without references" in {
@@ -259,7 +259,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
     changes.foreach(change => commitToRepo(repo, change.description, change.version, change.changeType, change.reference))
 
     val actualChanges = gitChangelog.getChanges
-    gitChangelog.generateMarkdown(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
+    gitChangelog.generateChangelog(changelogFile, actualChanges).contentAsString shouldBe expectedMarkdown
   }
 
   it should "fail if no changes are provided to markdown generation" in {
@@ -267,7 +267,7 @@ class GitChangelogTest extends FlatSpec with Matchers {
     val changelogFile = File.newTemporaryFile("changelogTestFile")
 
     assertThrows[IllegalArgumentException] {
-      gitChangelog.generateMarkdown(changelogFile, Seq())
+      gitChangelog.generateChangelog(changelogFile, Seq())
     }
   }
 }
